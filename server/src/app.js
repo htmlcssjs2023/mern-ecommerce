@@ -1,18 +1,18 @@
 const express = require('express');
+
 // this is used to check server port area.
 const morgan = require('morgan');
+
+
 // This is used for request body;
 const bodyParser = require('body-parser');
-// This is http-error package
-const createError = require('http-errors');
 
 // How many request can send in single minute;
 const xssClean = require('xss-clean');
 const rateLimit = require('express-rate-limit');
+const userRouter = require('./routers/userRouter');
 
 const app = express();
-
-
 // Middleware
 app.use(morgan('dev'));
 
@@ -23,6 +23,7 @@ app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
+app.use("/app/users",userRouter);
 
 // This middleware is used to limit sever request;
 const rateLimiter = rateLimit({
@@ -32,7 +33,6 @@ const rateLimiter = rateLimit({
 });
 app.use(xssClean());
 app.use(rateLimiter);
-
 
 const isLoggin = (req, res, next)=>{
     const login = true;
@@ -70,14 +70,6 @@ app.post('/post', (req, res)=>{
 //     });
 // });
 
-app.get('/app/user',(req, res)=>{
-    console.log(`User Id: ${req.body.id}`);
-    res.status(300).send({
-        message:"Return to user profile"
-    });
-});
-
-
 // https-error ====================
 
 // app.use((req,res,next)=>{
@@ -86,15 +78,15 @@ app.get('/app/user',(req, res)=>{
 //     });
 // });
 
-app.use((req,res,next)=>{
-    next(createError(404,'Page not found'));
-})
+// app.use((req,res,next)=>{
+//     next(createError(404,'Page not found'));
+// })
 
-app.use((err, req, res, next)=>{
-    res.status(err.status || 600).json({
-        success:false,
-        message:err.status
-    });
-})
+// app.use((err, req, res, next)=>{
+//     res.status(err.status || 600).json({
+//         success:false,
+//         message:err.status
+//     });
+// })
 
 module.exports = app;
